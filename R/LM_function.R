@@ -6,11 +6,13 @@
 #' @param resp Numerical vector containing the response of the experiment.
 #' @param ylab Dependent variable name (Accepts the \emph{expression}() function)
 #' @param xlab Independent variable name (Accepts the \emph{expression}() function)
-#' @param grau degree of the polynomial (1,2 or 3)
+#' @param grau Degree of the polynomial (1,2 or 3)
 #' @param theme ggplot2 theme (\emph{default} is theme_classic())
 #' @param error Error bar (It can be SE - \emph{default}, SD or FALSE)
-#' @param legend.position legend position (\emph{default} is "top")
-#' @param cardinal defines the value of y considered extreme (\emph{default} considers 0 germination)
+#' @param legend.position Legend position (\emph{default} is "top")
+#' @param cardinal Defines the value of y considered extreme (\emph{default} considers 0 germination)
+#' @param scale Sets x scale (\emph{default} is none, can be "log")
+#' @param width.bar Bar width
 #' @return The function returns the coefficients and respective p-values; statistical parameters such as AIC, BIC, R2, VIF; cardinal and optimal temperature and the graph using ggplot2 with the equation.
 #' @keywords regression linear
 #' @note if the maximum predicted value is equal to the maximum x, the curve does not have a maximum point within the studied range. If the minimum value is less than the lowest point studied, disregard the value.
@@ -19,7 +21,18 @@
 #' library(seedreg)
 #' data("aristolochia")
 #' attach(aristolochia)
-#' LM_model(trat,resp, grau = 3)
+#'
+#' #================================
+#' # Germination
+#' #================================
+#' LM_model(trat,germ, grau=3)
+#'
+#' #================================
+#' # Germination speed
+#' #================================
+#' LM_model(trat, vel, grau=3,
+#' ylab=expression("v"~(dias^-1)))
+
 
 LM_model=function(trat,
                   resp,
@@ -29,9 +42,12 @@ LM_model=function(trat,
                   grau=NA,
                   theme=theme_classic(),
                   cardinal=0,
-                  legend.position="top"){
+                  legend.position="top",
+                  width.bar=NA,
+                  scale="none"){
   requireNamespace("ggplot2")
   requireNamespace("crayon")
+  if(is.na(width.bar)==TRUE){width.bar=0.01*mean(trat)}
   if(is.na(grau)==TRUE){grau=1}
   dados=data.frame(trat,resp)
   medias=c()
@@ -76,22 +92,22 @@ LM_model=function(trat,
   mod2m=lm(media~dose+I(dose^2)+I(dose^3))
   mod05m=lm(media~dose+I(dose^0.5))
 
-  if(grau=="1"){r2=format(floor(summary(modm)$r.squared*100)/100, digits = 2)}
-  if(grau=="2"){r2=format(floor(summary(mod1m)$r.squared*100)/100, digits = 2)}
-  if(grau=="3"){r2=format(floor(summary(mod2m)$r.squared*100)/100, digits = 2)}
-  if(grau=="0.5"){r2=format(floor(summary(mod05m)$r.squared*100)/100, digits = 2)}
+  if(grau=="1"){r2=round(summary(modm)$r.squared,2)}
+  if(grau=="2"){r2=round(summary(mod1m)$r.squared,2)}
+  if(grau=="3"){r2=round(summary(mod2m)$r.squared,2)}
+  if(grau=="0.5"){r2=round(summary(mod05m)$r.squared,2)}
   if(grau=="1"){s1=s <- sprintf("~~~y == %e %s %e*x ~~~~~ italic(R^2) == %0.2f",
                                 coef(moda)[1],
                                 ifelse(coef(moda)[2] >= 0, "+", "-"),
                                 abs(coef(moda)[2]),
-                                as.numeric(as.character(r2)))}
+                                r2)}
   if(grau=="2"){s2=s <- sprintf("~~~y == %e %s %e * x %s %e * x^2 ~~~~~ italic(R^2) ==  %0.2f",
                                 coef(mod1a)[1],
                                 ifelse(coef(mod1a)[2] >= 0, "+", "-"),
                                 abs(coef(mod1a)[2]),
                                 ifelse(coef(mod1a)[3] >= 0, "+", "-"),
                                 abs(coef(mod1a)[3]),
-                                as.numeric(as.character(r2)))}
+                                r2)}
   if(grau=="3"){s3=s <- sprintf("~~~y == %e %s %e * x %s %e * x^2 %s %0.e * x^3 ~~~~~ italic(R^2) == %0.2f",
                                 coef(mod2a)[1],
                                 ifelse(coef(mod2a)[2] >= 0, "+", "-"),
@@ -100,20 +116,20 @@ LM_model=function(trat,
                                 abs(coef(mod2a)[3]),
                                 ifelse(coef(mod2a)[4] >= 0, "+", "-"),
                                 abs(coef(mod2a)[4]),
-                                as.numeric(as.character(r2)))}
+                                r2)}
   if(grau=="0.5"){s05=s <- sprintf("~~~y == %e %s %e * x %s %e * x^0.5 ~~~~~ italic(R^2) ==  %0.2f",
                                 coef(mod05a)[1],
                                 ifelse(coef(mod05a)[2] >= 0, "+", "-"),
                                 abs(coef(mod05a)[2]),
                                 ifelse(coef(mod05a)[3] >= 0, "+", "-"),
                                 abs(coef(mod05a)[3]),
-                                as.numeric(as.character(r2)))}
+                                r2)}
   data1=data.frame(trat,resp)
-  data1=data.frame(trat=as.numeric(as.character(names(media))),
+  data1=data.frame(trat=as.numeric(names(media)),
                    resp=media,
                    desvio)
   grafico=ggplot(data1,aes(x=trat,y=resp))+
-    geom_errorbar(aes(ymin=resp-desvio, ymax=resp+desvio),width=0.5)+
+    geom_errorbar(aes(ymin=resp-desvio, ymax=resp+desvio),width=width.bar,size=0.8)+
     geom_point(aes(fill=as.factor(rep(1,length(resp)))),na.rm=T,
                size=4.5,color="black",shape=21)+
     theme+ylab(ylab)+xlab(xlab)
@@ -139,6 +155,7 @@ LM_model=function(trat,
           legend.direction = "vertical",
           legend.text.align = 0,
           legend.justification = 0)
+  if(scale=="log"){grafico=grafico+scale_x_log10()}
   moda=lm(resp~trat)
   mod1a=lm(resp~trat+I(trat^2))
   mod2a=lm(resp~trat+I(trat^2)+I(trat^3))
@@ -150,13 +167,19 @@ LM_model=function(trat,
   aic=AIC(moda)
   bic=BIC(moda)
   vif=NA
+  predesp=predict(moda)
+  predobs=resp
+  rmse=sqrt(mean((predesp-predobs)^2))
+
   temp1=seq(min(trat),max(trat),length.out=10000)
   result=predict(moda,newdata = data.frame(trat=temp1),type="response")
   maximo=temp1[which.max(result)]
-  fa=temp1[result<=cardinal & temp1>maximo]
-  if(length(fa)>0){maxl=max(temp1[result<=cardinal & temp1>maximo])}else{maxl=NA}
-  fb=temp1[result<=cardinal & temp1<maximo]
-  if(length(fb)>0){minimo=max(temp1[result<=cardinal & temp1<maximo])}else{minimo=NA}}
+  respmax=result[which.max(result)]
+  result1=round(result,0)
+  fa=temp1[result1<=cardinal & temp1>maximo]
+  if(length(fa)>0){maxl=max(temp1[result1<=cardinal & temp1>maximo])}else{maxl=NA}
+  fb=temp1[result1<=cardinal & temp1<maximo]
+  if(length(fb)>0){minimo=max(temp1[result1<=cardinal & temp1<maximo])}else{minimo=NA}}
 
   if(grau=="2"){
   models=mod1s
@@ -164,13 +187,19 @@ LM_model=function(trat,
   aic=AIC(mod1a)
   bic=BIC(mod1a)
   vif=car::vif(mod1a)
+  predesp=predict(mod1a)
+  predobs=resp
+  rmse=sqrt(mean((predesp-predobs)^2))
+
   temp1=seq(min(trat),max(trat),length.out=10000)
   result=predict(mod1a,newdata = data.frame(trat=temp1),type="response")
   maximo=temp1[which.max(result)]
-  fa=temp1[result<=cardinal & temp1>maximo]
-  if(length(fa)>0){maxl=max(temp1[result<=cardinal & temp1>maximo])}else{maxl=NA}
-  fb=temp1[result<=cardinal & temp1<maximo]
-  if(length(fb)>0){minimo=max(temp1[result<=cardinal & temp1<maximo])}else{minimo=NA}}
+  respmax=result[which.max(result)]
+  result1=round(result,0)
+  fa=temp1[result1<=cardinal & temp1>maximo]
+  if(length(fa)>0){maxl=max(temp1[result1<=cardinal & temp1>maximo])}else{maxl=NA}
+  fb=temp1[result1<=cardinal & temp1<maximo]
+  if(length(fb)>0){minimo=max(temp1[result1<=cardinal & temp1<maximo])}else{minimo=NA}}
 
 
   if(grau=="3"){
@@ -179,13 +208,19 @@ LM_model=function(trat,
   aic=AIC(mod2a)
   bic=BIC(mod2a)
   vif=car::vif(mod2a)
+  predesp=predict(mod2a)
+  predobs=resp
+  rmse=sqrt(mean((predesp-predobs)^2))
+
   temp1=seq(min(trat),max(trat),length.out=10000)
   result=predict(mod2a,newdata = data.frame(trat=temp1),type="response")
   maximo=temp1[which.max(result)]
-  fa=temp1[result<=cardinal & temp1>maximo]
-  if(length(fa)>0){maxl=max(temp1[result<=cardinal & temp1>maximo])}else{maxl=NA}
-  fb=temp1[result<=cardinal & temp1<maximo]
-  if(length(fb)>0){minimo=max(temp1[result<=cardinal & temp1<maximo])}else{minimo=NA}}
+  respmax=result[which.max(result)]
+  result1=round(result,0)
+  fa=temp1[result1<=cardinal & temp1>maximo]
+  if(length(fa)>0){maxl=max(temp1[result1<=cardinal & temp1>maximo])}else{maxl=NA}
+  fb=temp1[result1<=cardinal & temp1<maximo]
+  if(length(fb)>0){minimo=max(temp1[result1<=cardinal & temp1<maximo])}else{minimo=NA}}
 
   if(grau=="0.5"){
     models=mod05s
@@ -193,21 +228,32 @@ LM_model=function(trat,
     aic=AIC(mod05a)
     bic=BIC(mod05a)
     vif=car::vif(mod05a)
+    predesp=predict(mod05a)
+    predobs=resp
+    rmse=sqrt(mean((predesp-predobs)^2))
     temp1=seq(min(trat),max(trat),length.out=10000)
     result=predict(mod05a,newdata = data.frame(trat=temp1),type="response")
     maximo=temp1[which.max(result)]
-    fa=temp1[result<=cardinal & temp1>maximo]
-    if(length(fa)>0){maxl=max(temp1[result<=cardinal & temp1>maximo])}else{maxl=NA}
-    fb=temp1[result<=cardinal & temp1<maximo]
-    if(length(fb)>0){minimo=max(temp1[result<=cardinal & temp1<maximo])}else{minimo=NA}}
-
-  print(models)
+    respmax=result[which.max(result)]
+    result1=round(result,0)
+    fa=temp1[result1<=cardinal & temp1>maximo]
+    if(length(fa)>0){maxl=max(temp1[result1<=cardinal & temp1>maximo])}else{maxl=NA}
+    fb=temp1[result1<=cardinal & temp1<maximo]
+    if(length(fb)>0){minimo=max(temp1[result1<=cardinal & temp1<maximo])}else{minimo=NA}}
   cat("\n")
   graphs=data.frame("Parameter"=c("optimum temperature",
+                                  "Maximum response",
                            "Predicted maximum value",
                            "Predicted minimum value",
-                           "AIC","BIC","r-squared"),
-             "values"=c(maximo,maxl,minimo,aic,bic,r2))
+                           "AIC","BIC","r-squared","RMSE"),
+             "values"=c(maximo,
+                        respmax,
+                        maxl,
+                        minimo,
+                        aic,
+                        bic,
+                        r2,
+                        rmse))
   graficos=list("Coefficients"=models,
                 "test"=graphs,
                 "VIF"=vif,

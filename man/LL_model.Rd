@@ -14,7 +14,9 @@ LL_model(
   theme = theme_classic(),
   legend.position = "top",
   cardinal = 0,
-  r2 = "all"
+  r2 = "all",
+  width.bar = NA,
+  scale = "none"
 )
 }
 \arguments{
@@ -28,18 +30,22 @@ LL_model(
 
 \item{ylab}{Variable response name (Accepts the \emph{expression}() function)}
 
-\item{xlab}{treatments name (Accepts the \emph{expression}() function)}
+\item{xlab}{Treatments name (Accepts the \emph{expression}() function)}
 
 \item{theme}{ggplot2 theme (\emph{default} is theme_bw())}
 
-\item{legend.position}{legend position (\emph{default} is c(0.3,0.8))}
+\item{legend.position}{Legend position (\emph{default} is c(0.3,0.8))}
 
-\item{cardinal}{defines the value of y considered extreme (\emph{default} considers 0 germination)}
+\item{cardinal}{Defines the value of y considered extreme (\emph{default} considers 0 germination)}
 
-\item{r2}{coefficient of determination of the mean or all values (\emph{default} is all)}
+\item{r2}{Coefficient of determination of the mean or all values (\emph{default} is all)}
+
+\item{width.bar}{Bar width}
+
+\item{scale}{Sets x scale (\emph{default} is none, can be "log")}
 }
 \value{
-The function returns the coefficients and respective p-values; statistical parameters such as AIC, BIC, pseudo-R2; cardinal and optimal temperatures and the graph using ggplot2 with the equation.
+The function returns the coefficients and respective p-values; statistical parameters such as AIC, BIC, pseudo-R2, RMSE (root mean squared error); cardinal and optimal temperatures and the graph using ggplot2 with the equation.
 }
 \description{
 Logistic models with three (LL.3) or four (LL.4) continuous data parameters. This model was extracted from the drc package and adapted for temperature analysis in seed germination.
@@ -58,7 +64,16 @@ if the maximum predicted value is equal to the maximum x, the curve does not hav
 library(seedreg)
 data("aristolochia")
 attach(aristolochia)
-LL_model(trat,resp)
+
+#================================
+# Germination
+#================================
+LL_model(trat,germ)
+
+#================================
+# Germination speed
+#================================
+LL_model(trat, vel, ylab=expression("v"~(dias^-1)))
 }
 \references{
 Seber, G. A. F. and Wild, C. J (1989) Nonlinear Regression, New York: Wiley \& Sons (p. 330).

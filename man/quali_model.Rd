@@ -7,17 +7,23 @@
 quali_model(
   trat,
   resp,
+  method = "glm",
   n = 50,
   family = "binomial",
   ylab = "Germination (\%)",
   xlab = expression("Temperature ("^"o" * "C)"),
+  reversed = TRUE,
+  angle = 0,
+  sup = NA,
   theme = theme_classic()
 )
 }
 \arguments{
 \item{trat}{Numerical or complex vector with treatments}
 
-\item{resp}{Numerical vector containing the response of the experiment.}
+\item{resp}{Numerical vector containing the response in percentage of the experiment.}
+
+\item{method}{method for analysis (analysis of variance - aov or analysis by generalized linear model - glm)}
 
 \item{n}{Number of seeds per repetition}
 
@@ -26,6 +32,12 @@ quali_model(
 \item{ylab}{Variable response name (Accepts the \emph{expression}() function)}
 
 \item{xlab}{treatments name (Accepts the \emph{expression}() function)}
+
+\item{reversed}{Letter order (\emph{default} is FALSE)}
+
+\item{angle}{x-axis scale text rotation}
+
+\item{sup}{Number of units above the standard deviation or average bar on the graph}
 
 \item{theme}{ggplot2 theme (\emph{default} is theme_bw())}
 }
@@ -39,5 +51,5 @@ Performs the deviance analysis for the generalized linear model using binomial o
 library(seedreg)
 data("aristolochia")
 attach(aristolochia)
-quali_model(trat, resp, n=25, family="quasibinomial")
+quali_model(trat, germ, n=25, family="quasibinomial")
 }

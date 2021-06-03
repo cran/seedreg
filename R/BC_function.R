@@ -6,12 +6,14 @@
 #' @param npar Number of model parameters (\emph{default} is  BC.4)
 #' @param error Error bar (It can be SE - \emph{default}, SD or FALSE)
 #' @param ylab Variable response name (Accepts the \emph{expression}() function)
-#' @param xlab treatments name (Accepts the \emph{expression}() function)
+#' @param xlab Treatments name (Accepts the \emph{expression}() function)
 #' @param theme ggplot2 theme (\emph{default} is theme_bw())
-#' @param legend.position legend position (\emph{default} is c(0.3,0.8))
-#' @param r2 coefficient of determination of the mean or all values (\emph{default} is all)
-#' @param cardinal defines the value of y considered extreme (\emph{default} considers 0 germination)
-#' @return The function returns the coefficients and respective p-values; statistical parameters such as AIC, BIC, pseudo-R2; cardinal and optimal temperatures and the graph using ggplot2 with the equation.
+#' @param legend.position Legend position (\emph{default} is c(0.3,0.8))
+#' @param r2 Coefficient of determination of the mean or all values (\emph{default} is all)
+#' @param cardinal Defines the value of y considered extreme (\emph{default} considers 0 germination)
+#' @param scale Sets x scale (\emph{default} is none, can be "log")
+#' @param width.bar bar width
+#' @return The function returns the coefficients and respective p-values; statistical parameters such as AIC, BIC, pseudo-R2, RMSE (root mean squared error); cardinal and optimal temperatures and the graph using ggplot2 with the equation.
 #' @details The model function for the Brain-Cousens model (Brain and Cousens, 1989) is
 #' \deqn{ f(x, b,c,d,e,f) = c + \frac{d-c+fx}{1+\exp(b(\log(x)-\log(e)))}}
 #' and it is a five-parameter model, obtained by extending the four-parameter log-logistic model (LL.4 to take into account inverse u-shaped hormesis effects.
@@ -35,6 +37,7 @@
 #' @importFrom stats glm
 #' @importFrom stats loess
 #' @importFrom stats nls
+#' @import multcompView
 #' @author Model imported from the drc package (Ritz et al., 2016)
 #' @author Gabriel Danilo Shimizu
 #' @author Leandro Simoes Azeredo Goncalves
@@ -44,7 +47,16 @@
 #' library(seedreg)
 #' data("aristolochia")
 #' attach(aristolochia)
-#' BC_model(trat,resp)
+#'
+#' #================================
+#' # Germination
+#' #================================
+#' BC_model(trat,germ)
+#'
+#' #================================
+#' # Germination speed
+#' #================================
+#' BC_model(trat, vel, ylab=expression("v"~(dias^-1)))
 
 BC_model=function(trat,
                   resp,
@@ -55,11 +67,14 @@ BC_model=function(trat,
                   theme=theme_classic(),
                   legend.position="top",
                   cardinal=0,
-                  r2="all"){
+                  r2="all",
+                  width.bar=NA,
+                  scale="none"){
   requireNamespace("ggplot2")
   requireNamespace("drc")
   requireNamespace("crayon")
   ymean=tapply(resp,trat,mean)
+  if(is.na(width.bar)==TRUE){width.bar=0.01*mean(trat)}
   if(error=="SE"){ysd=tapply(resp,trat,sd)/sqrt(tapply(resp,trat,length))}
   if(error=="SD"){ysd=tapply(resp,trat,sd)}
   if(error=="FALSE"){ysd=0}
@@ -108,14 +123,18 @@ BC_model=function(trat,
   xp=seq(min(trat),max(trat),length.out = 1000)
   preditos=data.frame(x=xp,
                       y=predict(mod,newdata = data.frame(trat=xp)))}
+  predesp=predict(mod)
+  predobs=resp
+  rmse=sqrt(mean((predesp-predobs)^2))
   x=preditos$x
   y=preditos$y
   s=equation
   data=data.frame(xmean,ymean)
   data1=data.frame(trat=xmean,resp=ymean)
   graph=ggplot(data,aes(x=xmean,y=ymean))
-  if(error!="FALSE"){graph=graph+geom_errorbar(aes(ymin=ymean-ysd,ymax=ymean+ysd),
-                                               width=0.5)}
+  if(error!="FALSE"){graph=graph+geom_errorbar(aes(ymin=ymean-ysd,
+                                                   ymax=ymean+ysd),
+                                               width=width.bar,size=0.8)}
   graph=graph+geom_point(aes(color="black"),size=4.5,pch=21,fill="gray")+
     theme+
     geom_line(data=preditos,aes(x=x,
@@ -129,23 +148,37 @@ BC_model=function(trat,
           legend.text.align = 0,
           legend.justification = 0)+
     ylab(ylab)+xlab(xlab)
+  if(scale=="log"){graph=graph+scale_x_log10()}
   temp1=seq(min(trat),max(trat),length.out=10000)
   result=predict(mod,newdata = data.frame(trat=temp1),
                  type="response")
   maximo=temp1[which.max(result)]
-  fa=temp1[result<=cardinal & temp1>maximo]
-  if(length(fa)>0){maxl=max(temp1[result<=cardinal & temp1>maximo])}else{maxl=NA}
-  fb=temp1[result<=cardinal & temp1<maximo]
-  if(length(fb)>0){minimo=max(temp1[result<=cardinal & temp1<maximo])}else{minimo=NA}
+  respmax=result[which.max(result)]
+  result1=round(result,0)
+  fa=temp1[result1<=cardinal & temp1>maximo]
+  if(length(fa)>0){maxl=max(temp1[result1<=cardinal & temp1>maximo])}else{
+    maxl=NA}
+  fb=temp1[result1<=cardinal & temp1<maximo]
+  if(length(fb)>0){minimo=max(temp1[result1<=cardinal & temp1<maximo])}else{
+    minimo=NA}
   aic=AIC(mod)
   bic=BIC(mod)
-  graphs=data.frame("Parameter"=c("optimum temperature","Predicted maximum value",
+  graphs=data.frame("Parameter"=c("optimum temperature",
+                                  "Maximum response",
+                                  "Predicted maximum value",
                                   "Predicted minimum value",
-                                  "AIC","BIC","r-squared"),
+                                  "AIC",
+                                  "BIC",
+                                  "r-squared",
+                                  "RMSE"),
                     "values"=c(maximo,
+                               respmax,
                                maxl,
                                minimo,
-                               aic,bic,r2))
+                               aic,
+                               bic,
+                               r2,
+                               rmse))
   graficos=list("Coefficients"=coef,
                 "values"=graphs,
                 graph)

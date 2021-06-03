@@ -12,7 +12,10 @@ multicurve(
   trat = NA,
   gray = FALSE,
   ylab = "Germination (\%)",
-  xlab = expression("Temperature ("^"o" * "C)")
+  xlab = expression("Temperature ("^"o" * "C)"),
+  width.bar = NA,
+  pointsize = 4.5,
+  linesize = 0.8
 )
 }
 \arguments{
@@ -31,6 +34,12 @@ multicurve(
 \item{ylab}{Variable response name (Accepts the \emph{expression}() function)}
 
 \item{xlab}{treatments name (Accepts the \emph{expression}() function)}
+
+\item{width.bar}{bar width}
+
+\item{pointsize}{shape size}
+
+\item{linesize}{line size}
 }
 \value{
 The function returns a graph joining the outputs of the functions LM_model, LL_model, BC_model, CD_model, loess_model, normal_model, piecewise_model and N_model
@@ -42,10 +51,10 @@ Merge multiple curves into a single graph
 library(seedreg)
 data("aristolochia")
 attach(aristolochia)
-a=LM_model(trat,resp)
-b=LL_model(trat,resp,npar = "LL.3")
-c=BC_model(trat,resp, npar = "BC.4")
-d=CD_model(trat,resp, npar = "CRS.4")
+a=LM_model(trat,germ)
+b=LL_model(trat,germ,npar = "LL.3")
+c=BC_model(trat,germ, npar = "BC.4")
+d=CD_model(trat,germ, npar = "CRS.4")
 multicurve(list(a,b,c,d))
 }
 \author{

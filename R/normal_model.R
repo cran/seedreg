@@ -9,7 +9,9 @@
 #' @param legend.position legend position (\emph{default} is c(0.3,0.8))
 #' @param r2 coefficient of determination of the mean or all values (\emph{default} is all)
 #' @param cardinal defines the value of y considered extreme (\emph{default} considers 0 germination)
-#' @return The function returns the coefficients and respective p-values; statistical parameters such as AIC, BIC, pseudo-R2; cardinal and optimal temperatures and the graph using ggplot2 with the equation.
+#' @param scale Sets x scale (\emph{default} is none, can be "log")
+#' @param width.bar bar width
+#' @return The function returns the coefficients and respective p-values; statistical parameters such as AIC, BIC, pseudo-R2, RMSE (root mean squared error); cardinal and optimal temperatures and the graph using ggplot2 with the equation.
 #' @details The model function for the normal model is:
 #' \deqn{f(x) = a \epsilon^{-\frac{(x-b)^2)}{c^2}}}
 #' @note if the maximum predicted value is equal to the maximum x, the curve does not have a maximum point within the studied range. If the minimum value is less than the lowest point studied, disregard the value.
@@ -20,7 +22,17 @@
 #' library(seedreg)
 #' data("aristolochia")
 #' attach(aristolochia)
-#' normal_model(trat,resp)
+#'
+#' #================================
+#' # Germination
+#' #================================
+#' normal_model(trat,germ)
+#'
+#' #================================
+#' # Germination speed
+#' #================================
+#' normal_model(trat, vel, ylab=expression("v"~(dias^-1)))
+
 
 normal_model=function(trat,
                       resp,
@@ -30,10 +42,13 @@ normal_model=function(trat,
                       error="SE",
                       legend.position="top",
                       cardinal=0,
-                      r2="all"){
+                      r2="all",
+                      width.bar=NA,
+                      scale="none"){
   requireNamespace("ggplot2")
   requireNamespace("drc")
   requireNamespace("crayon")
+  if(is.na(width.bar)==TRUE){width.bar=0.01*mean(trat)}
   ymean=tapply(resp,trat,mean)
   if(error=="SE"){ysd=tapply(resp,trat,sd)/sqrt(tapply(resp,trat,length))}
   if(error=="SD"){ysd=tapply(resp,trat,sd)}
@@ -59,6 +74,9 @@ normal_model=function(trat,
   xp=seq(min(trat),max(trat),length.out = 1000)
   preditos=data.frame(x=xp,
                       y=predict(mod,newdata = data.frame(trat=xp)))
+  predesp=predict(mod)
+  predobs=resp
+  rmse=sqrt(mean((predesp-predobs)^2))
   x=preditos$x
   y=preditos$y
   s=equation
@@ -66,7 +84,7 @@ normal_model=function(trat,
   data1=data.frame(trat=xmean,resp=ymean)
   graph=ggplot(data,aes(x=xmean,y=ymean))
   if(error!="FALSE"){graph=graph+geom_errorbar(aes(ymin=ymean-ysd,ymax=ymean+ysd),
-                                               width=0.5)}
+                                               width=width.bar,size=0.8)}
   graph=graph+
     geom_point(aes(color="black"),size=4.5,shape=21,fill="gray")+
     theme+
@@ -80,22 +98,28 @@ normal_model=function(trat,
           legend.text.align = 0,
           legend.justification = 0)+
     ylab(ylab)+xlab(xlab)
+  if(scale=="log"){graph=graph+scale_x_log10()}
   temp1=seq(min(trat),max(trat),length.out=10000)
   result=predict(mod,newdata = data.frame(trat=temp1),type="response")
   maximo=temp1[which.max(result)]
-  fa=temp1[result<=cardinal & temp1>maximo]
-  if(length(fa)>0){maxl=max(temp1[result<=cardinal & temp1>maximo])}else{maxl=NA}
-  fb=temp1[result<=cardinal & temp1<maximo]
-  if(length(fb)>0){minimo=max(temp1[result<=cardinal & temp1<maximo])}else{minimo=NA}
+  respmax=result[which.max(result)]
+  result1=round(result,0)
+  fa=temp1[result1<=cardinal & temp1>maximo]
+  if(length(fa)>0){maxl=max(temp1[result1<=cardinal & temp1>maximo])}else{maxl=NA}
+  fb=temp1[result1<=cardinal & temp1<maximo]
+  if(length(fb)>0){minimo=max(temp1[result1<=cardinal & temp1<maximo])}else{minimo=NA}
   aic=AIC(mod)
   bic=BIC(mod)
-  graphs=data.frame("Parameter"=c("optimum temperature","Predicted maximum value",
+  graphs=data.frame("Parameter"=c("optimum temperature",
+                                  "Maximum response",
+                                  "Predicted maximum value",
                                   "Predicted minimum value",
-                                  "AIC","BIC","r-squared"),
+                                  "AIC","BIC","r-squared","RMSE"),
                     "values"=c(maximo,
+                               respmax,
                                maxl,
                                minimo,
-                               aic,bic,r2))
+                               aic,bic,r2,rmse))
   graficos=list("Coefficients"=coef,
                 "values"=graphs,
                 graph)

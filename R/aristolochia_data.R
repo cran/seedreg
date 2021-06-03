@@ -14,7 +14,8 @@
 #' @format data.frame containing data set
 #'   \describe{
 #'   \item{\code{trat}}{numeric vector with factor 1}
-#'   \item{\code{resp}}{Numeric vector with response}
+#'   \item{\code{germ}}{Numeric vector with germination percentage}
+#'   \item{\code{vel}}{numerical vector with germination speed}
 #'   }
 #' @author Hugo Roldi Guariz
 #' @keywords datasets

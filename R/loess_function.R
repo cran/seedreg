@@ -9,6 +9,8 @@
 #' @param error Error bar (It can be SE - \emph{default}, SD or FALSE)
 #' @param legend.position legend position (\emph{default} is c(0.3,0.8))
 #' @param cardinal defines the value of y considered extreme (\emph{default} considers 0 germination)
+#' @param scale Sets x scale (\emph{default} is none, can be "log")
+#' @param width.bar bar width
 #' @return The function returns the loess regression; optimal and cardinal temperatures and graph using ggplot2.
 #' @seealso \link{loess}
 #' @export
@@ -19,7 +21,17 @@
 #' library(seedreg)
 #' data("aristolochia")
 #' attach(aristolochia)
-#' loess_model(trat,resp)
+#'
+#' #================================
+#' # Germination
+#' #================================
+#' loess_model(trat,germ)
+#'
+#' #================================
+#' # Germination speed
+#' #================================
+#' loess_model(trat, vel, ylab=expression("v"~(dias^-1)))
+
 
 loess_model=function(trat,
                      resp,
@@ -28,10 +40,13 @@ loess_model=function(trat,
                      theme=theme_classic(),
                      error="SE",
                      cardinal=0,
-                     legend.position="top"){
+                     width.bar=NA,
+                     legend.position="top",
+                     scale="none"){
   requireNamespace("ggplot2")
   requireNamespace("crayon")
   ymean=tapply(resp,trat,mean)
+  if(is.na(width.bar)==TRUE){width.bar=0.01*mean(trat)}
   if(error=="SE"){ysd=tapply(resp,trat,sd)/sqrt(tapply(resp,trat,length))}
   if(error=="SD"){ysd=tapply(resp,trat,sd)}
   if(error=="FALSE"){ysd=0}
@@ -48,11 +63,11 @@ loess_model=function(trat,
   s="~~~ Loess~regression"
   graph=ggplot(data,aes(x=xmean,y=ymean))
   if(error!="FALSE"){graph=graph+geom_errorbar(aes(ymin=ymean-ysd,ymax=ymean+ysd),
-                                               width=0.5)}
+                                               width=width.bar,size=0.8)}
   graph=graph+geom_point(aes(color="black"),size=4.5,shape=21,fill="gray")+
     theme+
-    geom_line(data=preditos,aes(x=preditos$x,
-                                y=preditos$y,color="black"),size=0.8)+
+    geom_line(data=preditos,aes(x=x,
+                                y=y,color="black"),size=0.8)+
     scale_color_manual(name="",values=1,label="Loess regression")+
     theme(axis.text = element_text(size=12,color="black"),
           legend.position = legend.position,
@@ -61,17 +76,21 @@ loess_model=function(trat,
           legend.text.align = 0,
           legend.justification = 0)+
     ylab(ylab)+xlab(xlab)
+  if(scale=="log"){graph=graph+scale_x_log10()}
   temp1=seq(min(trat),max(trat),length.out=10000)
   result=predict(mod,newdata = data.frame(trat=temp1),type="response")
   maximo=temp1[which.max(result)]
-  fa=temp1[result<=cardinal & temp1>maximo]
-  if(length(fa)>0){maxl=max(temp1[result<=cardinal & temp1>maximo])}else{maxl=NA}
-  fb=temp1[result<=cardinal & temp1<maximo]
-  if(length(fb)>0){minimo=max(temp1[result<=cardinal & temp1<maximo])}else{minimo=NA}
+  respmax=result[which.max(result)]
+  result1=round(result,0)
+  fa=temp1[result1<=cardinal & temp1>maximo]
+  if(length(fa)>0){maxl=max(temp1[result1<=cardinal & temp1>maximo])}else{maxl=NA}
+  fb=temp1[result1<=cardinal & temp1<maximo]
+  if(length(fb)>0){minimo=max(temp1[result1<=cardinal & temp1<maximo])}else{minimo=NA}
   graphs=data.frame("Parameter"=c("optimum temperature",
+                                  "Maximum response",
                                   "Predicted maximum value",
                                   "Predicted minimum value"),
-                    "values"=c(maximo,maxl,minimo))
+                    "values"=c(maximo,respmax,maxl,minimo))
   graficos=list("test"=graphs,graph)
   print(graficos)
 }

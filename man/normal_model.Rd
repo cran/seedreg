@@ -13,7 +13,9 @@ normal_model(
   error = "SE",
   legend.position = "top",
   cardinal = 0,
-  r2 = "all"
+  r2 = "all",
+  width.bar = NA,
+  scale = "none"
 )
 }
 \arguments{
@@ -34,9 +36,13 @@ normal_model(
 \item{cardinal}{defines the value of y considered extreme (\emph{default} considers 0 germination)}
 
 \item{r2}{coefficient of determination of the mean or all values (\emph{default} is all)}
+
+\item{width.bar}{bar width}
+
+\item{scale}{Sets x scale (\emph{default} is none, can be "log")}
 }
 \value{
-The function returns the coefficients and respective p-values; statistical parameters such as AIC, BIC, pseudo-R2; cardinal and optimal temperatures and the graph using ggplot2 with the equation.
+The function returns the coefficients and respective p-values; statistical parameters such as AIC, BIC, pseudo-R2, RMSE (root mean squared error); cardinal and optimal temperatures and the graph using ggplot2 with the equation.
 }
 \description{
 Analysis: Normal model
@@ -52,7 +58,16 @@ if the maximum predicted value is equal to the maximum x, the curve does not hav
 library(seedreg)
 data("aristolochia")
 attach(aristolochia)
-normal_model(trat,resp)
+
+#================================
+# Germination
+#================================
+normal_model(trat,germ)
+
+#================================
+# Germination speed
+#================================
+normal_model(trat, vel, ylab=expression("v"~(dias^-1)))
 }
 \author{
 Gabriel Danilo Shimizu

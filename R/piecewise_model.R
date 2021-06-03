@@ -13,6 +13,7 @@
 #' @param theme ggplot2 theme (\emph{default} is theme_classic())
 #' @param legend.position legend position (\emph{default} is c(0.3,0.8))
 #' @param cardinal defines the value of y considered extreme (\emph{default} considers 0 germination)
+#' @param width.bar bar width
 #' @note if the maximum predicted value is equal to the maximum x, the curve does not have a maximum point within the studied range. If the minimum value is less than the lowest point studied, disregard the value.
 #' @return The function returns the coefficients and respective p-values; statistical parameters such as AIC, BIC, pseudo-R2; cardinal and optimal temperatures and the graph using ggplot2 with the equation.
 #' @export
@@ -25,7 +26,17 @@
 #' library(seedreg)
 #' data("aristolochia")
 #' attach(aristolochia)
-#' piecewise_model(trat,resp)
+#'
+#' #================================
+#' # Germination
+#' #================================
+#' piecewise_model(trat,germ)
+#'
+#' #================================
+#' # Germination speed
+#' #================================
+#' piecewise_model(trat, vel, ylab=expression("v"~(dias^-1)))
+
 
 piecewise_model=function (trat,
                           resp,
@@ -38,7 +49,9 @@ piecewise_model=function (trat,
                           xlab=expression("Temperature ("^"o"*"C)"),
                           theme=theme_classic(),
                           cardinal=0,
+                          width.bar=NA,
                           legend.position="top"){
+  if(is.na(width.bar)==TRUE){width.bar=0.01*mean(trat)}
   piecewise.linear.simple <- function(x, y, middle=1){
     piecewise.linear.likelihood <- function(alpha, x, y){
       N <- length(x);
@@ -128,8 +141,9 @@ piecewise_model=function (trat,
   data=data.frame(xmean,ymean)
   data1=data.frame(trat=xmean,resp=ymean)
   graph=ggplot(data1,aes(x=xmean,y=ymean))
-  if(error!="FALSE"){graph=graph+geom_errorbar(aes(ymin=ymean-ysd,ymax=ymean+ysd),
-                                               width=0.5)}
+  if(error!="FALSE"){graph=graph+geom_errorbar(aes(ymin=ymean-ysd,
+                                                   ymax=ymean+ysd),
+                                               width=width.bar,size=0.8)}
   graph=graph+geom_point(aes(color="black"),size=4.5,shape=21,fill="gray")+
     theme+
     geom_line(data=preditos1,aes(x=x,y=y,color="black"),size=0.8)+
@@ -142,22 +156,24 @@ piecewise_model=function (trat,
           legend.justification = 0)+
     ylab(ylab)+xlab(xlab)
   maximo=breaks
-
-  fa=temp1[result<=cardinal & temp1>breaks]
-  if(length(fa)>0){maxl=max(temp1[result<=cardinal & temp1>breaks])}else{maxl=NA}
-  fb=temp1[result<=cardinal & temp1<breaks]
-  if(length(fb)>0){minimo=max(temp1[result<=cardinal & temp1<breaks])}else{minimo=NA}
+  result1=round(result,0)
+  fa=temp1[result1<=cardinal & temp1>breaks]
+  if(length(fa)>0){maxl=max(temp1[result1<=cardinal & temp1>breaks])}else{maxl=NA}
+  fb=temp1[result1<=cardinal & temp1<breaks]
+  if(length(fb)>0){minimo=max(temp1[result1<=cardinal & temp1<breaks])}else{minimo=NA}
+  rmse=sqrt(mean((result1-resp)^2))
 
   aic=AIC(mod$model)
   bic=BIC(mod$model)
   #print(summary(mod$model))
-  graphs=data.frame("Parameter"=c("optimum temperature","Predicted maximum value",
+  graphs=data.frame("Parameter"=c("optimum temperature",
+                                  "Predicted maximum value",
                                   "Predicted minimum value",
-                                  "AIC","BIC","r-squared"),
+                                  "AIC","BIC","r-squared","RMSE"),
                     "values"=c(maximo,
                                maxl,
                                minimo,
-                               aic,bic,r2))
+                               aic,bic,r2,rmse))
   graficos=list("Coefficients"=summary(mod$model),
                 "values"=graphs,
                 graph)

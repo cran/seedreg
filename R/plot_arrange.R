@@ -7,6 +7,9 @@
 #' @param xlab treatments name (Accepts the \emph{expression}() function)
 #' @param legend.position legend position (\emph{default} is c(0.3,0.8))
 #' @param gray gray scale (\emph{default} is FALSE)
+#' @param width.bar bar width
+#' @param pointsize shape size
+#' @param linesize line size
 #' @return The function returns a graph joining the outputs of the functions LM_model, LL_model, BC_model, CD_model, loess_model, normal_model, piecewise_model and N_model
 #' @author Gabriel Danilo Shimizu
 #' @export
@@ -14,10 +17,10 @@
 #' library(seedreg)
 #' data("aristolochia")
 #' attach(aristolochia)
-#' a=LM_model(trat,resp)
-#' b=LL_model(trat,resp,npar = "LL.3")
-#' c=BC_model(trat,resp, npar = "BC.4")
-#' d=CD_model(trat,resp, npar = "CRS.4")
+#' a=LM_model(trat,germ)
+#' b=LL_model(trat,germ,npar = "LL.3")
+#' c=BC_model(trat,germ, npar = "BC.4")
+#' d=CD_model(trat,germ, npar = "CRS.4")
 #' multicurve(list(a,b,c,d))
 
 multicurve=function(plots,
@@ -27,7 +30,10 @@ multicurve=function(plots,
                trat=NA,
                gray=FALSE,
                ylab="Germination (%)",
-               xlab=expression("Temperature ("^"o"*"C)")){
+               xlab=expression("Temperature ("^"o"*"C)"),
+               width.bar=NA,
+               pointsize=4.5,
+               linesize=0.8){
   requireNamespace("ggplot2")
   equation=1:length(plots)
   grafico=ggplot()
@@ -36,6 +42,7 @@ multicurve=function(plots,
     equation[[i]]=plots[[i]][[]]$plot$s
     x=plots[[i]][[]]$plot$temp1
     y=plots[[i]][[]]$plot$result
+    if(is.na(width.bar)==TRUE){width.bar=0.01*mean(x)}
     data=data.frame(x,y,color=as.factor(i))
     pontosx=plots[[i]][[]]$plot$data1$trat
     pontosy=plots[[i]][[]]$plot$data1$resp
@@ -52,14 +59,17 @@ multicurve=function(plots,
                         ymin=y-desvio,
                         ymax=y+desvio,
                         color=color,
-                        group=color),width=0.8, size=1)+
-      geom_point(data=pontos,aes(x=x,y=y,
-                                 color=color,
-                                 group=color),size=4.5)+
+                        group=color),width=width.bar, size=linesize)+
       geom_line(data=data,aes(x=x,
                               y=y,
                               color=color,
-                              group=color),size=0.8)
+                              group=color),size=linesize)+
+      geom_point(data=pontos,aes(x=x,y=y,
+                                 color=color,
+                                 group=color),
+                 size=pointsize,
+                 shape=21,
+                 fill="gray90")
   }
   texto=parse(text=paste(trat,"~",unlist(equation)))
   grafico=grafico+
@@ -85,16 +95,16 @@ multicurve=function(plots,
                       aes(x=x,
                           y=y,
                           ymin=y-desvio,
-                          ymax=y+desvio),width=0.8, size=1)+
+                          ymax=y+desvio),width=width.bar, size=linesize)+
         geom_point(data=pontos,aes(x=x,
                                    y=y,
                                    pch=color,
                                    group=color),
-                   size=4.5,fill="gray")+
+                   size=pointsize,fill="gray")+
         geom_line(data=data,aes(x=x,
                                 y=y,
                                 lty=color,
-                                group=color),size=0.8)
+                                group=color),size=linesize)
     }
     texto=parse(text=paste(trat,"~",unlist(equation)))
     grafico=grafico+

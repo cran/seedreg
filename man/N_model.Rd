@@ -9,8 +9,10 @@ N_model(
   resp,
   ylab = "Germination (\%)",
   error = "SE",
+  legend = "not~signifcant",
   xlab = expression("Temperature ("^"o" * "C)"),
   theme = theme_classic(),
+  width.bar = NA,
   legend.position = "top"
 )
 }
@@ -23,11 +25,15 @@ N_model(
 
 \item{error}{Error bar (It can be SE - \emph{default}, SD or FALSE)}
 
+\item{legend}{Add the legend}
+
 \item{xlab}{Independent variable name (Accepts the \emph{expression}() function)}
 
 \item{theme}{ggplot2 theme (\emph{default} is theme_classic())}
 
-\item{legend.position}{legend position (\emph{default} is "top")}
+\item{width.bar}{Bar width}
+
+\item{legend.position}{Legend position (\emph{default} is "top")}
 }
 \value{
 The function returns an exploratory graph of segments
@@ -39,7 +45,16 @@ Ggraph for non-significant trend. Can be used within the multicurve command
 library(seedreg)
 data("aristolochia")
 attach(aristolochia)
-N_model(trat,resp)
+
+#================================
+# Germination
+#================================
+N_model(trat,germ)
+
+#================================
+# Germination speed
+#================================
+N_model(trat, vel, ylab=expression("v"~(dias^-1)))
 }
 \author{
 Gabriel Danilo Shimizu

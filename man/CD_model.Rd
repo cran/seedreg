@@ -14,7 +14,9 @@ CD_model(
   theme = theme_classic(),
   legend.position = "top",
   cardinal = 0,
-  r2 = "all"
+  r2 = "all",
+  width.bar = NA,
+  scale = "none"
 )
 }
 \arguments{
@@ -37,9 +39,13 @@ CD_model(
 \item{cardinal}{defines the value of y considered extreme (\emph{default} considers 0 germination)}
 
 \item{r2}{coefficient of determination of the mean or all values (\emph{default} is all)}
+
+\item{width.bar}{bar width}
+
+\item{scale}{Sets x scale (\emph{default} is none, can be "log")}
 }
 \value{
-The function returns the coefficients and respective p-values; statistical parameters such as AIC, BIC, pseudo-R2; cardinal and optimal temperatures and the graph using ggplot2 with the equation.
+The function returns the coefficients and respective p-values; statistical parameters such as AIC, BIC, pseudo-R2, RMSE (root mean squared error); cardinal and optimal temperatures and the graph using ggplot2 with the equation.
 }
 \description{
 The 'CRS.4' and 'CRS.5' logistical models provide Brain-Cousens modified logistical models to describe u-shaped hormesis. This model was extracted from the 'drc' package and adapted for temperature analysis in seed germination
@@ -60,7 +66,16 @@ if the maximum predicted value is equal to the maximum x, the curve does not hav
 library(seedreg)
 data("aristolochia")
 attach(aristolochia)
-CD_model(trat,resp)
+
+#================================
+# Germination
+#================================
+CD_model(trat,germ)
+
+#================================
+# Germination speed
+#================================
+CD_model(trat, vel, ylab=expression("v"~(dias^-1)))
 }
 \references{
 Seber, G. A. F. and Wild, C. J (1989) Nonlinear Regression, New York: Wiley \& Sons (p. 330).

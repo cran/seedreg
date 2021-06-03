@@ -12,7 +12,9 @@ loess_model(
   theme = theme_classic(),
   error = "SE",
   cardinal = 0,
-  legend.position = "top"
+  width.bar = NA,
+  legend.position = "top",
+  scale = "none"
 )
 }
 \arguments{
@@ -30,7 +32,11 @@ loess_model(
 
 \item{cardinal}{defines the value of y considered extreme (\emph{default} considers 0 germination)}
 
+\item{width.bar}{bar width}
+
 \item{legend.position}{legend position (\emph{default} is c(0.3,0.8))}
+
+\item{scale}{Sets x scale (\emph{default} is none, can be "log")}
 }
 \value{
 The function returns the loess regression; optimal and cardinal temperatures and graph using ggplot2.
@@ -45,7 +51,16 @@ if the maximum predicted value is equal to the maximum x, the curve does not hav
 library(seedreg)
 data("aristolochia")
 attach(aristolochia)
-loess_model(trat,resp)
+
+#================================
+# Germination
+#================================
+loess_model(trat,germ)
+
+#================================
+# Germination speed
+#================================
+loess_model(trat, vel, ylab=expression("v"~(dias^-1)))
 }
 \seealso{
 \link{loess}

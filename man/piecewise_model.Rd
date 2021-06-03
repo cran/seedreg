@@ -16,6 +16,7 @@ piecewise_model(
   xlab = expression("Temperature ("^"o" * "C)"),
   theme = theme_classic(),
   cardinal = 0,
+  width.bar = NA,
   legend.position = "top"
 )
 }
@@ -42,6 +43,8 @@ piecewise_model(
 
 \item{cardinal}{defines the value of y considered extreme (\emph{default} considers 0 germination)}
 
+\item{width.bar}{bar width}
+
 \item{legend.position}{legend position (\emph{default} is c(0.3,0.8))}
 }
 \value{
@@ -57,7 +60,16 @@ if the maximum predicted value is equal to the maximum x, the curve does not hav
 library(seedreg)
 data("aristolochia")
 attach(aristolochia)
-piecewise_model(trat,resp)
+
+#================================
+# Germination
+#================================
+piecewise_model(trat,germ)
+
+#================================
+# Germination speed
+#================================
+piecewise_model(trat, vel, ylab=expression("v"~(dias^-1)))
 }
 \references{
 Chiu, G. S., R. Lockhart, and R. Routledge. 2006. Bent-cable regression theory and applications. Journal of the American Statistical Association 101:542-553.

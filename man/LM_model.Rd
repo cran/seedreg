@@ -13,7 +13,9 @@ LM_model(
   grau = NA,
   theme = theme_classic(),
   cardinal = 0,
-  legend.position = "top"
+  legend.position = "top",
+  width.bar = NA,
+  scale = "none"
 )
 }
 \arguments{
@@ -27,13 +29,17 @@ LM_model(
 
 \item{xlab}{Independent variable name (Accepts the \emph{expression}() function)}
 
-\item{grau}{degree of the polynomial (1,2 or 3)}
+\item{grau}{Degree of the polynomial (1,2 or 3)}
 
 \item{theme}{ggplot2 theme (\emph{default} is theme_classic())}
 
-\item{cardinal}{defines the value of y considered extreme (\emph{default} considers 0 germination)}
+\item{cardinal}{Defines the value of y considered extreme (\emph{default} considers 0 germination)}
 
-\item{legend.position}{legend position (\emph{default} is "top")}
+\item{legend.position}{Legend position (\emph{default} is "top")}
+
+\item{width.bar}{Bar width}
+
+\item{scale}{Sets x scale (\emph{default} is none, can be "log")}
 }
 \value{
 The function returns the coefficients and respective p-values; statistical parameters such as AIC, BIC, R2, VIF; cardinal and optimal temperature and the graph using ggplot2 with the equation.
@@ -48,7 +54,17 @@ if the maximum predicted value is equal to the maximum x, the curve does not hav
 library(seedreg)
 data("aristolochia")
 attach(aristolochia)
-LM_model(trat,resp, grau = 3)
+
+#================================
+# Germination
+#================================
+LM_model(trat,germ, grau=3)
+
+#================================
+# Germination speed
+#================================
+LM_model(trat, vel, grau=3,
+ylab=expression("v"~(dias^-1)))
 }
 \author{
 Gabriel Danilo Shimizu
