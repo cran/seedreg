@@ -15,7 +15,9 @@ quali_model(
   reversed = TRUE,
   angle = 0,
   sup = NA,
-  theme = theme_classic()
+  theme = theme_classic(),
+  font.family = "sans",
+  geom = "bar"
 )
 }
 \arguments{
@@ -40,6 +42,10 @@ quali_model(
 \item{sup}{Number of units above the standard deviation or average bar on the graph}
 
 \item{theme}{ggplot2 theme (\emph{default} is theme_bw())}
+
+\item{font.family}{Font family (\emph{default} is sans)}
+
+\item{geom}{type of graph ("bar" or "point")}
 }
 \value{
 The function returns analysis by glm (binomial or quasibinomial family), post-hoc and column graph

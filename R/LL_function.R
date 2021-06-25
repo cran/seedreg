@@ -13,7 +13,26 @@
 #' @param cardinal Defines the value of y considered extreme (\emph{default} considers 0 germination)
 #' @param scale Sets x scale (\emph{default} is none, can be "log")
 #' @param width.bar Bar width
-#' @return The function returns the coefficients and respective p-values; statistical parameters such as AIC, BIC, pseudo-R2, RMSE (root mean squared error); cardinal and optimal temperatures and the graph using ggplot2 with the equation.
+#' @param textsize Font size
+#' @param pointsize shape size
+#' @param linesize line size
+#' @param pointshape format point (\emph{default} is 21)
+#' @param font.family Font family (\emph{default} is sans)
+#' @return
+#'   \describe{
+#'   \item{\code{Coefficients}}{Coefficients and their p values}
+#'   \item{\code{Optimum temperature}}{Optimum temperature (equivalent to the maximum point)}
+#'   \item{\code{Optimum temperature response}}{Response at the optimal temperature (equivalent to the maximum point)}
+#'   \item{\code{Minimal temperature}}{Temperature that has the lowest response}
+#'   \item{\code{Minimal temperature response}}{Lowest predicted response}
+#'   \item{\code{Predicted maximum basal value}}{Lower basal limit temperature based on the value set by the user (default is 0)}
+#'   \item{\code{Predicted minimum basal value}}{Upper basal limit temperature based on the value set by the user (default is 0)}
+#'   \item{\code{AIC}}{Akaike information criterion}
+#'   \item{\code{BIC}}{Bayesian Inference Criterion}
+#'   \item{\code{r-squared}}{Determination coefficient}
+#'   \item{\code{RMSE}}{Root mean square error}
+#'   \item{\code{grafico}}{Graph in ggplot2 with equation}
+#'   }
 #' @details The three-parameter log-logistic function with lower limit 0 is
 #' \deqn{f(x) = 0 + \frac{d}{1+\exp(b(\log(x)-\log(e)))}}
 #' The four-parameter log-logistic function is given by the expression
@@ -54,7 +73,12 @@ LL_model=function(trat,
                   cardinal=0,
                   r2="all",
                   width.bar=NA,
-                  scale="none"){
+                  scale="none",
+                  textsize=12,
+                  pointsize=4.5,
+                  linesize=0.8,
+                  pointshape=21,
+                  font.family="sans"){
   requireNamespace("drc")
   requireNamespace("crayon")
   requireNamespace("ggplot2")
@@ -109,16 +133,17 @@ LL_model=function(trat,
   data1=data.frame(trat=xmean,resp=ymean)
   graph=ggplot(data,aes(x=xmean,y=ymean))
   if(error!="FALSE"){graph=graph+geom_errorbar(aes(ymin=ymean-ysd,ymax=ymean+ysd),
-                                               width=width.bar,size=0.8)}
+                                               width=width.bar,size=linesize)}
   graph=graph+
-    geom_point(aes(color="black"),size=4.5,shape=21,fill="gray")+
+    geom_point(aes(color="black"),size=pointsize,shape=pointshape,fill="gray")+
     theme+
     geom_line(data=preditos,aes(x=x,
-                                y=y,color="black"),size=0.8)+
+                                y=y,color="black"),size=linesize)+
     scale_color_manual(name="",values=1,label=parse(text = equation))+
-    theme(axis.text = element_text(size=12,color="black"),
+    theme(axis.text = element_text(size=textsize,color="black",family = font.family),
+          axis.title = element_text(family = font.family),
           legend.position = legend.position,
-          legend.text = element_text(size=12),
+          legend.text = element_text(size=textsize,family = font.family),
           legend.direction = "vertical",
           legend.text.align = 0,
           legend.justification = 0)+
@@ -128,6 +153,9 @@ LL_model=function(trat,
   result=predict(mod,newdata = data.frame(temp=temp1),type="response")
   maximo=temp1[which.max(result)]
   respmax=result[which.max(result)]
+  mini=temp1[which.min(result)]
+  respmin=result[which.min(result)]
+
   result1=round(result,0)
   fa=temp1[result1<=cardinal & temp1>maximo]
   if(length(fa)>0){maxl=max(temp1[result1<=cardinal & temp1>maximo])}else{maxl=NA}
@@ -136,16 +164,23 @@ LL_model=function(trat,
   aic=AIC(mod)
   bic=BIC(mod)
   graphs=data.frame("Parameter"=c("Optimum temperature",
-                                  "Maximum response",
-                                  "Predicted maximum value",
-                                  "Predicted minimum value",
+                                  "Optimum temperature response",
+                                  "Minimal temperature",
+                                  "Minimal temperature response",
+                                  "Predicted maximum basal value",
+                                  "Predicted minimum basal value",
                                   "AIC","BIC","r-squared","RMSE"),
-                    "values"=c(maximo,
+                    "values"=round(c(maximo,
                                respmax,
+                               mini,
+                               respmin,
                                maxl,
                                minimo,
-                               aic,bic,r2,rmse))
-  graficos=list("Coefficients"=coef,
+                               aic,bic,r2,rmse),7))
+  models=data.frame(coef$coefficients)
+  models$Sig=ifelse(models$p.value>0.05,"ns",ifelse(models$p.value<0.01,"**","*"))
+  colnames(models)=c("Estimate","Std Error","t value","P-value","")
+  graficos=list("Coefficients"=models,
                 "values"=graphs,
                 graph)
   print(graficos)

@@ -15,7 +15,12 @@ LM_model(
   cardinal = 0,
   legend.position = "top",
   width.bar = NA,
-  scale = "none"
+  scale = "none",
+  textsize = 12,
+  pointsize = 4.5,
+  linesize = 0.8,
+  pointshape = 21,
+  font.family = "sans"
 )
 }
 \arguments{
@@ -40,15 +45,39 @@ LM_model(
 \item{width.bar}{Bar width}
 
 \item{scale}{Sets x scale (\emph{default} is none, can be "log")}
+
+\item{textsize}{Font size}
+
+\item{pointsize}{shape size}
+
+\item{linesize}{line size}
+
+\item{pointshape}{format point (\emph{default} is 21)}
+
+\item{font.family}{Font family (\emph{default} is sans)}
 }
 \value{
-The function returns the coefficients and respective p-values; statistical parameters such as AIC, BIC, R2, VIF; cardinal and optimal temperature and the graph using ggplot2 with the equation.
+\describe{
+  \item{\code{Coefficients}}{Coefficients and their p values}
+  \item{\code{Optimum temperature}}{Optimum temperature (equivalent to the maximum point)}
+  \item{\code{Optimum temperature response}}{Response at the optimal temperature (equivalent to the maximum point)}
+  \item{\code{Minimal temperature}}{Temperature that has the lowest response}
+  \item{\code{Minimal temperature response}}{Lowest predicted response}
+  \item{\code{Predicted maximum basal value}}{Lower basal limit temperature based on the value set by the user (default is 0)}
+  \item{\code{Predicted minimum basal value}}{Upper basal limit temperature based on the value set by the user (default is 0)}
+  \item{\code{AIC}}{Akaike information criterion}
+  \item{\code{BIC}}{Bayesian Inference Criterion}
+  \item{\code{VIF}}{Variance inflation factor (multicollinearity)}
+  \item{\code{r-squared}}{Determination coefficient}
+  \item{\code{RMSE}}{Root mean square error}
+  \item{\code{grafico}}{Graph in ggplot2 with equation}
+  }
 }
 \description{
 Linear regression analysis of an experiment with a quantitative factor or isolated effect of a quantitative factor
 }
 \note{
-if the maximum predicted value is equal to the maximum x, the curve does not have a maximum point within the studied range. If the minimum value is less than the lowest point studied, disregard the value.
+If the maximum predicted value is equal to the maximum x, the curve does not have a maximum point within the studied range. If the minimum value is less than the lowest point studied, disregard the value.
 }
 \examples{
 library(seedreg)

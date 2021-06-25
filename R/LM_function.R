@@ -13,9 +13,29 @@
 #' @param cardinal Defines the value of y considered extreme (\emph{default} considers 0 germination)
 #' @param scale Sets x scale (\emph{default} is none, can be "log")
 #' @param width.bar Bar width
-#' @return The function returns the coefficients and respective p-values; statistical parameters such as AIC, BIC, R2, VIF; cardinal and optimal temperature and the graph using ggplot2 with the equation.
+#' @param textsize Font size
+#' @param pointsize shape size
+#' @param linesize line size
+#' @param pointshape format point (\emph{default} is 21)
+#' @param font.family Font family (\emph{default} is sans)
 #' @keywords regression linear
-#' @note if the maximum predicted value is equal to the maximum x, the curve does not have a maximum point within the studied range. If the minimum value is less than the lowest point studied, disregard the value.
+#' @note If the maximum predicted value is equal to the maximum x, the curve does not have a maximum point within the studied range. If the minimum value is less than the lowest point studied, disregard the value.
+#' @return
+#'   \describe{
+#'   \item{\code{Coefficients}}{Coefficients and their p values}
+#'   \item{\code{Optimum temperature}}{Optimum temperature (equivalent to the maximum point)}
+#'   \item{\code{Optimum temperature response}}{Response at the optimal temperature (equivalent to the maximum point)}
+#'   \item{\code{Minimal temperature}}{Temperature that has the lowest response}
+#'   \item{\code{Minimal temperature response}}{Lowest predicted response}
+#'   \item{\code{Predicted maximum basal value}}{Lower basal limit temperature based on the value set by the user (default is 0)}
+#'   \item{\code{Predicted minimum basal value}}{Upper basal limit temperature based on the value set by the user (default is 0)}
+#'   \item{\code{AIC}}{Akaike information criterion}
+#'   \item{\code{BIC}}{Bayesian Inference Criterion}
+#'   \item{\code{VIF}}{Variance inflation factor (multicollinearity)}
+#'   \item{\code{r-squared}}{Determination coefficient}
+#'   \item{\code{RMSE}}{Root mean square error}
+#'   \item{\code{grafico}}{Graph in ggplot2 with equation}
+#'   }
 #' @export
 #' @examples
 #' library(seedreg)
@@ -44,7 +64,12 @@ LM_model=function(trat,
                   cardinal=0,
                   legend.position="top",
                   width.bar=NA,
-                  scale="none"){
+                  scale="none",
+                  textsize=12,
+                  pointsize=4.5,
+                  linesize=0.8,
+                  pointshape=21,
+                  font.family="sans"){
   requireNamespace("ggplot2")
   requireNamespace("crayon")
   if(is.na(width.bar)==TRUE){width.bar=0.01*mean(trat)}
@@ -129,14 +154,14 @@ LM_model=function(trat,
                    resp=media,
                    desvio)
   grafico=ggplot(data1,aes(x=trat,y=resp))+
-    geom_errorbar(aes(ymin=resp-desvio, ymax=resp+desvio),width=width.bar,size=0.8)+
+    geom_errorbar(aes(ymin=resp-desvio, ymax=resp+desvio),width=width.bar,size=linesize)+
     geom_point(aes(fill=as.factor(rep(1,length(resp)))),na.rm=T,
-               size=4.5,color="black",shape=21)+
+               size=pointsize,color="black",shape=pointshape)+
     theme+ylab(ylab)+xlab(xlab)
-  if(grau=="1"){grafico=grafico+geom_smooth(method = "lm",se=F, na.rm=T, formula = y~x,size=0.8,color="black")}
-  if(grau=="2"){grafico=grafico+geom_smooth(method = "lm",se=F, na.rm=T, formula = y~x+I(x^2),size=0.8,color="black")}
-  if(grau=="3"){grafico=grafico+geom_smooth(method = "lm",se=F, na.rm=T, formula = y~x+I(x^2)+I(x^3),size=0.8,color="black")}
-  if(grau=="0.5"){grafico=grafico+geom_smooth(method = "lm",se=F, na.rm=T, formula = y~x+I(x^0.5),size=0.8,color="black")}
+  if(grau=="1"){grafico=grafico+geom_smooth(method = "lm",se=F, na.rm=T, formula = y~x,size=linesize,color="black")}
+  if(grau=="2"){grafico=grafico+geom_smooth(method = "lm",se=F, na.rm=T, formula = y~x+I(x^2),size=linesize,color="black")}
+  if(grau=="3"){grafico=grafico+geom_smooth(method = "lm",se=F, na.rm=T, formula = y~x+I(x^2)+I(x^3),size=linesize,color="black")}
+  if(grau=="0.5"){grafico=grafico+geom_smooth(method = "lm",se=F, na.rm=T, formula = y~x+I(x^0.5),size=linesize,color="black")}
   if(grau=="1"){grafico=grafico+
     scale_fill_manual(values="gray",label=c(parse(text=s1)),name="")}
   if(grau=="2"){grafico=grafico+
@@ -147,11 +172,11 @@ LM_model=function(trat,
     scale_fill_manual(values="gray",label=c(parse(text=s05)),name="")}
 
   grafico=grafico+
-    theme(text = element_text(size=12,color="black"),
-          axis.text = element_text(size=12,color="black"),
-          axis.title = element_text(size=12,color="black"),
+    theme(text = element_text(size=textsize,color="black",family = font.family),
+          axis.text = element_text(size=textsize,color="black",family = font.family),
+          axis.title = element_text(size=textsize,color="black",family = font.family),
           legend.position = legend.position,
-          legend.text=element_text(size=12),
+          legend.text=element_text(size=textsize,family = font.family),
           legend.direction = "vertical",
           legend.text.align = 0,
           legend.justification = 0)
@@ -175,6 +200,9 @@ LM_model=function(trat,
   result=predict(moda,newdata = data.frame(trat=temp1),type="response")
   maximo=temp1[which.max(result)]
   respmax=result[which.max(result)]
+  mini=temp1[which.min(result)]
+  respmin=result[which.min(result)]
+
   result1=round(result,0)
   fa=temp1[result1<=cardinal & temp1>maximo]
   if(length(fa)>0){maxl=max(temp1[result1<=cardinal & temp1>maximo])}else{maxl=NA}
@@ -195,6 +223,9 @@ LM_model=function(trat,
   result=predict(mod1a,newdata = data.frame(trat=temp1),type="response")
   maximo=temp1[which.max(result)]
   respmax=result[which.max(result)]
+  mini=temp1[which.min(result)]
+  respmin=result[which.min(result)]
+
   result1=round(result,0)
   fa=temp1[result1<=cardinal & temp1>maximo]
   if(length(fa)>0){maxl=max(temp1[result1<=cardinal & temp1>maximo])}else{maxl=NA}
@@ -216,6 +247,9 @@ LM_model=function(trat,
   result=predict(mod2a,newdata = data.frame(trat=temp1),type="response")
   maximo=temp1[which.max(result)]
   respmax=result[which.max(result)]
+  mini=temp1[which.min(result)]
+  respmin=result[which.min(result)]
+
   result1=round(result,0)
   fa=temp1[result1<=cardinal & temp1>maximo]
   if(length(fa)>0){maxl=max(temp1[result1<=cardinal & temp1>maximo])}else{maxl=NA}
@@ -235,25 +269,35 @@ LM_model=function(trat,
     result=predict(mod05a,newdata = data.frame(trat=temp1),type="response")
     maximo=temp1[which.max(result)]
     respmax=result[which.max(result)]
+    mini=temp1[which.min(result)]
+    respmin=result[which.min(result)]
+
     result1=round(result,0)
     fa=temp1[result1<=cardinal & temp1>maximo]
     if(length(fa)>0){maxl=max(temp1[result1<=cardinal & temp1>maximo])}else{maxl=NA}
     fb=temp1[result1<=cardinal & temp1<maximo]
     if(length(fb)>0){minimo=max(temp1[result1<=cardinal & temp1<maximo])}else{minimo=NA}}
   cat("\n")
-  graphs=data.frame("Parameter"=c("optimum temperature",
-                                  "Maximum response",
-                           "Predicted maximum value",
-                           "Predicted minimum value",
+  graphs=data.frame("Parameter"=c("Optimum temperature",
+                                  "Optimum temperature response",
+                                  "Minimal temperature",
+                                  "Minimal temperature response",
+                                  "Predicted maximum basal value",
+                           "Predicted minimum basal value",
                            "AIC","BIC","r-squared","RMSE"),
              "values"=c(maximo,
                         respmax,
+                        mini,
+                        respmin,
                         maxl,
                         minimo,
                         aic,
                         bic,
                         r2,
                         rmse))
+  models=data.frame(models)
+  models$Sig=ifelse(models$Pr...t..>0.05,"ns",ifelse(models$Pr...t..<0.01,"**","*"))
+  colnames(models)=c("Estimate","Std Error","t value","P-value","")
   graficos=list("Coefficients"=models,
                 "test"=graphs,
                 "VIF"=vif,

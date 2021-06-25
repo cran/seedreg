@@ -12,6 +12,8 @@
 #' @param sup Number of units above the standard deviation or average bar on the graph
 #' @param reversed Letter order (\emph{default} is FALSE)
 #' @param angle x-axis scale text rotation
+#' @param font.family Font family (\emph{default} is sans)
+#' @param geom type of graph ("bar" or "point")
 #' @return The function returns analysis by glm (binomial or quasibinomial family), post-hoc and column graph
 #' @export
 #' @importFrom emmeans emmeans
@@ -37,7 +39,9 @@ quali_model=function(trat,
                      reversed=TRUE,
                      angle=0,
                      sup=NA,
-                     theme=theme_classic()){
+                     theme=theme_classic(),
+                     font.family="sans",
+                     geom="bar"){
   if(is.na(sup==TRUE)){sup=0.1*mean(resp)}
   requireNamespace("ggplot2")
   requireNamespace("drc")
@@ -97,6 +101,7 @@ quali_model=function(trat,
     aaa=cld(regrid(emmeans(mod,~trat)),Letters = letters,
             reversed = reversed,
             sort = FALSE)
+    if(geom=="bar"){
     graph=ggplot(aaa,aes(y=aaa$prob*100,x=as.factor(trat)))+
       geom_col(color="black",fill="gray")+
       theme+
@@ -104,10 +109,23 @@ quali_model=function(trat,
                         ymax=aaa$asymp.UCL*100),width=0.2,size=0.8)+
       geom_label(aes(y=aaa$asymp.UCL*100+sup,
                      label=paste(round(aaa$prob*100,1),
-                                 str_trim(aaa$.group))))+
-      theme(axis.text = element_text(size=12,color="black"),
-            axis.text.x=element_text(hjust = 1.01,angle=angle))+
-      labs(x=xlab, y=ylab)
+                                 str_trim(aaa$.group))),family = font.family)+
+      theme(axis.text = element_text(size=12,color="black",family = font.family),
+            axis.text.x=element_text(hjust = 1.01,angle=angle,family = font.family))+
+      labs(x=xlab, y=ylab)}
+
+    if(geom=="point"){
+      graph=ggplot(aaa,aes(y=aaa$prob*100,x=as.factor(trat)))+
+        geom_point(color="black",fill="gray",size=5)+
+        theme+
+        geom_errorbar(aes(ymin=aaa$asymp.LCL*100,
+                          ymax=aaa$asymp.UCL*100),width=0.2,size=0.8)+
+        geom_label(aes(y=aaa$asymp.UCL*100+sup,
+                       label=paste(round(aaa$prob*100,1),
+                                   str_trim(aaa$.group))),family = font.family)+
+        theme(axis.text = element_text(size=12,color="black",family = font.family),
+              axis.text.x=element_text(hjust = 1.01,angle=angle,family = font.family))+
+        labs(x=xlab, y=ylab)}
     cat("\n=======================================================\n")
     print(anova)
     cat("\n=======================================================\n")

@@ -2,7 +2,7 @@
 % Please edit documentation in R/N_model.R
 \name{N_model}
 \alias{N_model}
-\title{Analysis: graph for not significant trend}
+\title{Analysis: Graph for not significant trend}
 \usage{
 N_model(
   trat,
@@ -13,7 +13,12 @@ N_model(
   xlab = expression("Temperature ("^"o" * "C)"),
   theme = theme_classic(),
   width.bar = NA,
-  legend.position = "top"
+  legend.position = "top",
+  textsize = 12,
+  pointsize = 4.5,
+  linesize = 0.8,
+  pointshape = 21,
+  font.family = "sans"
 )
 }
 \arguments{
@@ -34,12 +39,22 @@ N_model(
 \item{width.bar}{Bar width}
 
 \item{legend.position}{Legend position (\emph{default} is "top")}
+
+\item{textsize}{Font size}
+
+\item{pointsize}{shape size}
+
+\item{linesize}{line size}
+
+\item{pointshape}{format point (\emph{default} is 21)}
+
+\item{font.family}{Font family (\emph{default} is sans)}
 }
 \value{
 The function returns an exploratory graph of segments
 }
 \description{
-Ggraph for non-significant trend. Can be used within the multicurve command
+Graph for non-significant trend. Can be used within the multicurve command
 }
 \examples{
 library(seedreg)

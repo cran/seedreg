@@ -10,12 +10,15 @@ multicurve(
   legend.title = NULL,
   legend.position = "top",
   trat = NA,
-  gray = FALSE,
+  method = "shape_color",
+  fill = "gray90",
   ylab = "Germination (\%)",
   xlab = expression("Temperature ("^"o" * "C)"),
   width.bar = NA,
   pointsize = 4.5,
-  linesize = 0.8
+  linesize = 0.8,
+  textsize = 12,
+  font.family = "sans"
 )
 }
 \arguments{
@@ -29,7 +32,9 @@ multicurve(
 
 \item{trat}{name of the curves}
 
-\item{gray}{gray scale (\emph{default} is FALSE)}
+\item{method}{marking method}
+
+\item{fill}{dot fill color in case gray=F}
 
 \item{ylab}{Variable response name (Accepts the \emph{expression}() function)}
 
@@ -40,12 +45,19 @@ multicurve(
 \item{pointsize}{shape size}
 
 \item{linesize}{line size}
+
+\item{textsize}{Font size}
+
+\item{font.family}{Font family (\emph{default} is sans)}
 }
 \value{
 The function returns a graph joining the outputs of the functions LM_model, LL_model, BC_model, CD_model, loess_model, normal_model, piecewise_model and N_model
 }
 \description{
 Merge multiple curves into a single graph
+}
+\details{
+The method argument defines the type of markup desired by the user. By default, method="shape_color" is used, which differentiates by color and dot shape. For gray scale, use method="shape_gray". To use only color, use method="color", in this case, the dot shape is 16 (filled circle). You can change the stitch pattern by setting the fill color in quotes followed by a space and the stitch number (eg "gray 21"). Still starting from this last method, if the user uses the change to point format without filling, such as 15, 16, 17 or 18, the function will ignore the first argument (ex. "gray 16"), however, of either way the user must define a color.
 }
 \examples{
 library(seedreg)

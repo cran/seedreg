@@ -14,7 +14,12 @@ loess_model(
   cardinal = 0,
   width.bar = NA,
   legend.position = "top",
-  scale = "none"
+  scale = "none",
+  textsize = 12,
+  pointsize = 4.5,
+  linesize = 0.8,
+  pointshape = 21,
+  font.family = "sans"
 )
 }
 \arguments{
@@ -37,9 +42,27 @@ loess_model(
 \item{legend.position}{legend position (\emph{default} is c(0.3,0.8))}
 
 \item{scale}{Sets x scale (\emph{default} is none, can be "log")}
+
+\item{textsize}{Font size}
+
+\item{pointsize}{shape size}
+
+\item{linesize}{line size}
+
+\item{pointshape}{format point (\emph{default} is 21)}
+
+\item{font.family}{Font family (\emph{default} is sans)}
 }
 \value{
-The function returns the loess regression; optimal and cardinal temperatures and graph using ggplot2.
+\describe{
+  \item{\code{Optimum temperature}}{Optimum temperature (equivalent to the maximum point)}
+  \item{\code{Optimum temperature response}}{Response at the optimal temperature (equivalent to the maximum point)}
+  \item{\code{Minimal temperature}}{Temperature that has the lowest response}
+  \item{\code{Minimal temperature response}}{Lowest predicted response}
+  \item{\code{Predicted maximum basal value}}{Lower basal limit temperature based on the value set by the user (default is 0)}
+  \item{\code{Predicted minimum basal value}}{Upper basal limit temperature based on the value set by the user (default is 0)}
+  \item{\code{grafico}}{Graph in ggplot2 with equation}
+  }
 }
 \description{
 Fit a polynomial surface determined by one or more numerical predictors, using local fitting.

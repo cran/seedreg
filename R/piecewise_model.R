@@ -14,8 +14,27 @@
 #' @param legend.position legend position (\emph{default} is c(0.3,0.8))
 #' @param cardinal defines the value of y considered extreme (\emph{default} considers 0 germination)
 #' @param width.bar bar width
+#' @param textsize Font size
+#' @param pointsize shape size
+#' @param linesize line size
+#' @param pointshape format point (\emph{default} is 21)
+#' @param font.family Font family (\emph{default} is sans)
 #' @note if the maximum predicted value is equal to the maximum x, the curve does not have a maximum point within the studied range. If the minimum value is less than the lowest point studied, disregard the value.
-#' @return The function returns the coefficients and respective p-values; statistical parameters such as AIC, BIC, pseudo-R2; cardinal and optimal temperatures and the graph using ggplot2 with the equation.
+#' @return
+#'   \describe{
+#'   \item{\code{Coefficients}}{Coefficients and their p values}
+#'   \item{\code{Optimum temperature}}{Optimum temperature (equivalent to the maximum point)}
+#'   \item{\code{Optimum temperature response}}{Response at the optimal temperature (equivalent to the maximum point)}
+#'   \item{\code{Minimal temperature}}{Temperature that has the lowest response}
+#'   \item{\code{Minimal temperature response}}{Lowest predicted response}
+#'   \item{\code{Predicted maximum basal value}}{Lower basal limit temperature based on the value set by the user (default is 0)}
+#'   \item{\code{Predicted minimum basal value}}{Upper basal limit temperature based on the value set by the user (default is 0)}
+#'   \item{\code{AIC}}{Akaike information criterion}
+#'   \item{\code{BIC}}{Bayesian Inference Criterion}
+#'   \item{\code{r-squared}}{Determination coefficient}
+#'   \item{\code{RMSE}}{Root mean square error}
+#'   \item{\code{grafico}}{Graph in ggplot2 with equation}
+#'   }
 #' @export
 #' @author Model imported from the SiZer package
 #' @author Gabriel Danilo Shimizu
@@ -50,7 +69,12 @@ piecewise_model=function (trat,
                           theme=theme_classic(),
                           cardinal=0,
                           width.bar=NA,
-                          legend.position="top"){
+                          legend.position="top",
+                          textsize=12,
+                          pointsize=4.5,
+                          linesize=0.8,
+                          pointshape=21,
+                          font.family="sans"){
   if(is.na(width.bar)==TRUE){width.bar=0.01*mean(trat)}
   piecewise.linear.simple <- function(x, y, middle=1){
     piecewise.linear.likelihood <- function(alpha, x, y){
@@ -143,19 +167,24 @@ piecewise_model=function (trat,
   graph=ggplot(data1,aes(x=xmean,y=ymean))
   if(error!="FALSE"){graph=graph+geom_errorbar(aes(ymin=ymean-ysd,
                                                    ymax=ymean+ysd),
-                                               width=width.bar,size=0.8)}
-  graph=graph+geom_point(aes(color="black"),size=4.5,shape=21,fill="gray")+
+                                               width=width.bar,size=linesize)}
+  graph=graph+geom_point(aes(color="black"),size=pointsize,shape=pointshape,fill="gray")+
     theme+
-    geom_line(data=preditos1,aes(x=x,y=y,color="black"),size=0.8)+
+    geom_line(data=preditos1,aes(x=x,y=y,color="black"),size=linesize)+
     scale_color_manual(name="",values=1,label=parse(text = equation))+
-    theme(axis.text = element_text(size=12,color="black"),
+    theme(axis.text = element_text(size=textsize,color="black",family = font.family),
           legend.position = legend.position,
-          legend.text = element_text(size=12),
+          legend.text = element_text(size=textsize,family = font.family),
+          axis.title = element_text(family = font.family),
           legend.direction = "vertical",
           legend.text.align = 0,
           legend.justification = 0)+
     ylab(ylab)+xlab(xlab)
   maximo=breaks
+  respmax=b0+b1*breaks
+  mini=temp1[which.min(result)]
+  respmin=result[which.min(result)]
+
   result1=round(result,0)
   fa=temp1[result1<=cardinal & temp1>breaks]
   if(length(fa)>0){maxl=max(temp1[result1<=cardinal & temp1>breaks])}else{maxl=NA}
@@ -166,15 +195,24 @@ piecewise_model=function (trat,
   aic=AIC(mod$model)
   bic=BIC(mod$model)
   #print(summary(mod$model))
-  graphs=data.frame("Parameter"=c("optimum temperature",
-                                  "Predicted maximum value",
-                                  "Predicted minimum value",
+  graphs=data.frame("Parameter"=c("Optimum temperature",
+                                  "Optimum temperature response",
+                                  "Minimal temperature",
+                                  "Minimal temperature response",
+                                  "Predicted maximum basal value",
+                                  "Predicted minimum basal value",
                                   "AIC","BIC","r-squared","RMSE"),
-                    "values"=c(maximo,
+                    "values"=round(c(maximo,
+                               respmax,
+                               mini,
+                               respmin,
                                maxl,
                                minimo,
-                               aic,bic,r2,rmse))
-  graficos=list("Coefficients"=summary(mod$model),
+                               aic,bic,r2,rmse),7))
+  models=data.frame(summary(mod$model)$coefficients)
+  models$Sig=ifelse(models$Pr...t..>0.05,"ns",ifelse(models$Pr...t..<0.01,"**","*"))
+  colnames(models)=c("Estimate","Std Error","t value","P-value","")
+  graficos=list("Coefficients"=models,
                 "values"=graphs,
                 graph)
   print(graficos)

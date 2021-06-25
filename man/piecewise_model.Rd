@@ -17,7 +17,12 @@ piecewise_model(
   theme = theme_classic(),
   cardinal = 0,
   width.bar = NA,
-  legend.position = "top"
+  legend.position = "top",
+  textsize = 12,
+  pointsize = 4.5,
+  linesize = 0.8,
+  pointshape = 21,
+  font.family = "sans"
 )
 }
 \arguments{
@@ -46,9 +51,32 @@ piecewise_model(
 \item{width.bar}{bar width}
 
 \item{legend.position}{legend position (\emph{default} is c(0.3,0.8))}
+
+\item{textsize}{Font size}
+
+\item{pointsize}{shape size}
+
+\item{linesize}{line size}
+
+\item{pointshape}{format point (\emph{default} is 21)}
+
+\item{font.family}{Font family (\emph{default} is sans)}
 }
 \value{
-The function returns the coefficients and respective p-values; statistical parameters such as AIC, BIC, pseudo-R2; cardinal and optimal temperatures and the graph using ggplot2 with the equation.
+\describe{
+  \item{\code{Coefficients}}{Coefficients and their p values}
+  \item{\code{Optimum temperature}}{Optimum temperature (equivalent to the maximum point)}
+  \item{\code{Optimum temperature response}}{Response at the optimal temperature (equivalent to the maximum point)}
+  \item{\code{Minimal temperature}}{Temperature that has the lowest response}
+  \item{\code{Minimal temperature response}}{Lowest predicted response}
+  \item{\code{Predicted maximum basal value}}{Lower basal limit temperature based on the value set by the user (default is 0)}
+  \item{\code{Predicted minimum basal value}}{Upper basal limit temperature based on the value set by the user (default is 0)}
+  \item{\code{AIC}}{Akaike information criterion}
+  \item{\code{BIC}}{Bayesian Inference Criterion}
+  \item{\code{r-squared}}{Determination coefficient}
+  \item{\code{RMSE}}{Root mean square error}
+  \item{\code{grafico}}{Graph in ggplot2 with equation}
+  }
 }
 \description{
 Fit a degree 1 spline with 1 knot point where the location of the knot point is unknown.

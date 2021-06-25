@@ -11,7 +11,21 @@
 #' @param cardinal defines the value of y considered extreme (\emph{default} considers 0 germination)
 #' @param scale Sets x scale (\emph{default} is none, can be "log")
 #' @param width.bar bar width
-#' @return The function returns the loess regression; optimal and cardinal temperatures and graph using ggplot2.
+#' @param textsize Font size
+#' @param pointsize shape size
+#' @param linesize line size
+#' @param pointshape format point (\emph{default} is 21)
+#' @param font.family Font family (\emph{default} is sans)
+#' @return
+#'   \describe{
+#'   \item{\code{Optimum temperature}}{Optimum temperature (equivalent to the maximum point)}
+#'   \item{\code{Optimum temperature response}}{Response at the optimal temperature (equivalent to the maximum point)}
+#'   \item{\code{Minimal temperature}}{Temperature that has the lowest response}
+#'   \item{\code{Minimal temperature response}}{Lowest predicted response}
+#'   \item{\code{Predicted maximum basal value}}{Lower basal limit temperature based on the value set by the user (default is 0)}
+#'   \item{\code{Predicted minimum basal value}}{Upper basal limit temperature based on the value set by the user (default is 0)}
+#'   \item{\code{grafico}}{Graph in ggplot2 with equation}
+#'   }
 #' @seealso \link{loess}
 #' @export
 #' @note if the maximum predicted value is equal to the maximum x, the curve does not have a maximum point within the studied range. If the minimum value is less than the lowest point studied, disregard the value.
@@ -42,7 +56,12 @@ loess_model=function(trat,
                      cardinal=0,
                      width.bar=NA,
                      legend.position="top",
-                     scale="none"){
+                     scale="none",
+                     textsize=12,
+                     pointsize=4.5,
+                     linesize=0.8,
+                     pointshape=21,
+                     font.family="sans"){
   requireNamespace("ggplot2")
   requireNamespace("crayon")
   ymean=tapply(resp,trat,mean)
@@ -63,15 +82,16 @@ loess_model=function(trat,
   s="~~~ Loess~regression"
   graph=ggplot(data,aes(x=xmean,y=ymean))
   if(error!="FALSE"){graph=graph+geom_errorbar(aes(ymin=ymean-ysd,ymax=ymean+ysd),
-                                               width=width.bar,size=0.8)}
-  graph=graph+geom_point(aes(color="black"),size=4.5,shape=21,fill="gray")+
+                                               width=width.bar,size=linesize)}
+  graph=graph+geom_point(aes(color="black"),size=pointsize,shape=pointshape,fill="gray")+
     theme+
     geom_line(data=preditos,aes(x=x,
-                                y=y,color="black"),size=0.8)+
+                                y=y,color="black"),size=linesize)+
     scale_color_manual(name="",values=1,label="Loess regression")+
-    theme(axis.text = element_text(size=12,color="black"),
+    theme(axis.text = element_text(size=textsize,color="black",family = font.family),
           legend.position = legend.position,
-          legend.text = element_text(size=12),
+          axis.title = element_text(family = font.family),
+          legend.text = element_text(size=textsize,family = font.family),
           legend.direction = "vertical",
           legend.text.align = 0,
           legend.justification = 0)+
@@ -81,16 +101,23 @@ loess_model=function(trat,
   result=predict(mod,newdata = data.frame(trat=temp1),type="response")
   maximo=temp1[which.max(result)]
   respmax=result[which.max(result)]
+  mini=temp1[which.min(result)]
+  respmin=result[which.min(result)]
+
   result1=round(result,0)
   fa=temp1[result1<=cardinal & temp1>maximo]
   if(length(fa)>0){maxl=max(temp1[result1<=cardinal & temp1>maximo])}else{maxl=NA}
   fb=temp1[result1<=cardinal & temp1<maximo]
   if(length(fb)>0){minimo=max(temp1[result1<=cardinal & temp1<maximo])}else{minimo=NA}
-  graphs=data.frame("Parameter"=c("optimum temperature",
-                                  "Maximum response",
-                                  "Predicted maximum value",
-                                  "Predicted minimum value"),
-                    "values"=c(maximo,respmax,maxl,minimo))
+  graphs=data.frame("Parameter"=c("Optimum temperature",
+                                  "Optimum temperature response",
+                                  "Minimal temperature",
+                                  "Minimal temperature response",
+                                  "Predicted maximum basal value",
+                                  "Predicted minimum basal value"),
+                    "values"=round(c(maximo,respmax,
+                               mini,
+                               respmin,maxl,minimo),7))
   graficos=list("test"=graphs,graph)
   print(graficos)
 }
