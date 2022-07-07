@@ -6,9 +6,7 @@
 \alias{seedreg-package}
 \title{seedreg: Regression Analysis for Seed Germination as a Function of Temperature}
 \description{
-\if{html}{\figure{logo.png}{options: align='right' alt='logo' width='120'}}
-
-Regression analysis using common models in seed temperature studies, such as the Gaussian model (Martins, JF, Barroso, AAM, & Alves, PLCA (2017) <doi:10.1590/s0100-83582017350100039>), quadratic (Nunes, AL, Sossmeier, S, Gotz, AP, & Bispo, NB (2018) <doi: 10.17265/2161-6264/2018.06.002>) and others with potential for use, such as those implemented in the 'drc' package (Ritz, C, Baty, F, Streibig, JC, & Gerhard, D (2015). <doi:10.1371/journal.pone.0146021>), in the estimation of the ideal and cardinal temperature for the occurrence of plant seed germination. The functions return graphs with the equations automatically.
+Regression analysis using common models in seed temperature studies, such as the Gaussian model (Martins, JF, Barroso, AAM, & Alves, PLCA (2017) \doi{10.1590/s0100-83582017350100039}), quadratic (Nunes, AL, Sossmeier, S, Gotz, AP, & Bispo, NB (2018) \doi{ 10.17265/2161-6264/2018.06.002}) and others with potential for use, such as those implemented in the 'drc' package (Ritz, C, Baty, F, Streibig, JC, & Gerhard, D (2015). \doi{10.1371/journal.pone.0146021}), in the estimation of the ideal and cardinal temperature for the occurrence of plant seed germination. The functions return graphs with the equations automatically.
 }
 \author{
 \strong{Maintainer}: Gabriel Danilo Shimizu \email{shimizu@uel.br} (\href{https://orcid.org/0000-0001-8524-508X}{ORCID})

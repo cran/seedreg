@@ -105,7 +105,7 @@ BC_model(trat,germ)
 BC_model(trat, vel, ylab=expression("v"~(dias^-1)))
 }
 \references{
-Seber, G. A. F. and Wild, C. J (1989) Nonlinear Regression, New York: Wiley \& Sons (p. 330).
+Seber, G. A. F. and Wild, C. J (1989) Nonlinear Regression, New York: Wiley and Sons (p. 330).
 
 Ritz, C.; STREBIG, J.C. and RITZ, M.C. Package ‘drc’. Creative Commons: Mountain View, CA, USA, 2016.
 }

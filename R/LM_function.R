@@ -1,6 +1,8 @@
 #' Analysis: Linear regression graph
+#'
 #' @author Gabriel Danilo Shimizu
 #' @author Leandro Simoes Azeredo Goncalves
+#'
 #' @description Linear regression analysis of an experiment with a quantitative factor or isolated effect of a quantitative factor
 #' @param trat Numerical vector with treatments (Declare as numeric)
 #' @param resp Numerical vector containing the response of the experiment.
@@ -300,7 +302,6 @@ LM_model=function(trat,
   colnames(models)=c("Estimate","Std Error","t value","P-value","")
   graficos=list("Coefficients"=models,
                 "test"=graphs,
-                "VIF"=vif,
                 grafico)
   print(graficos)
 }

@@ -1,4 +1,4 @@
-#' Merge multiple curves into a single graph
+#' Graph: Merge multiple curves into a single graph
 #' @param plots list with objects of type LM_model, BC_model, CD_model, LL_model or normal_model
 #' @param theme ggplot2 theme (\emph{default} is theme_classi())
 #' @param legend.title caption title
@@ -46,14 +46,14 @@ multicurve=function(plots,
   grafico=ggplot()
   if(method=="color"){
     for(i in 1:length(plots)){
-      equation[[i]]=plots[[i]][[]]$plot$s
-      x=plots[[i]][[]]$plot$temp1
-      y=plots[[i]][[]]$plot$result
+      equation[[i]]=plots[[i]][[3]]$plot$s
+      x=plots[[i]][[3]]$plot$temp1
+      y=plots[[i]][[3]]$plot$result
       if(is.na(width.bar)==TRUE){width.bar=0.01*mean(x)}
       data=data.frame(x,y,color=as.factor(i))
-      pontosx=plots[[i]][[]]$plot$data1$trat
-      pontosy=plots[[i]][[]]$plot$data1$resp
-      desvio=plots[[i]][[]]$plot$desvio
+      pontosx=plots[[i]][[3]]$plot$data1$trat
+      pontosy=plots[[i]][[3]]$plot$data1$resp
+      desvio=plots[[i]][[3]]$plot$desvio
       pontos=data.frame(x=pontosx,
                         y=pontosy,
                         desvio=desvio,
@@ -92,14 +92,14 @@ multicurve=function(plots,
   if(method!="color" & method!="shape_gray" & method!="shape_color"){
     formato=unlist(stringr::str_split(method,pattern = " "))
     for(i in 1:length(plots)){
-      equation[[i]]=plots[[i]][[]]$plot$s
-      x=plots[[i]][[]]$plot$temp1
-      y=plots[[i]][[]]$plot$result
+      equation[[i]]=plots[[i]][[3]]$plot$s
+      x=plots[[i]][[3]]$plot$temp1
+      y=plots[[i]][[3]]$plot$result
       if(is.na(width.bar)==TRUE){width.bar=0.01*mean(x)}
       data=data.frame(x,y,color=as.factor(i))
-      pontosx=plots[[i]][[]]$plot$data1$trat
-      pontosy=plots[[i]][[]]$plot$data1$resp
-      desvio=plots[[i]][[]]$plot$desvio
+      pontosx=plots[[i]][[3]]$plot$data1$trat
+      pontosy=plots[[i]][[3]]$plot$data1$resp
+      desvio=plots[[i]][[3]]$plot$desvio
       pontos=data.frame(x=pontosx,
                         y=pontosy,
                         desvio=desvio,
@@ -138,13 +138,13 @@ multicurve=function(plots,
   }
   if(method=="shape_gray"){
     for(i in 1:length(plots)){
-      equation[[i]]=plots[[i]][[]]$plot$s
-      x=plots[[i]][[]]$plot$temp1
-      y=plots[[i]][[]]$plot$result
+      equation[[i]]=plots[[i]][[3]]$plot$s
+      x=plots[[i]][[3]]$plot$temp1
+      y=plots[[i]][[3]]$plot$result
       data=data.frame(x,y,color=as.factor(i))
-      pontosx=plots[[i]][[]]$plot$data1$trat
-      pontosy=plots[[i]][[]]$plot$data1$resp
-      desvio=plots[[i]][[]]$plot$desvio
+      pontosx=plots[[i]][[3]]$plot$data1$trat
+      pontosy=plots[[i]][[3]]$plot$data1$resp
+      desvio=plots[[i]][[3]]$plot$desvio
       pontos=data.frame(x=pontosx,y=pontosy,desvio=desvio,color=as.factor(i))
       grafico=grafico+
         geom_errorbar(data=pontos,
@@ -176,14 +176,14 @@ multicurve=function(plots,
             legend.text.align = 0)+ylab(ylab)+xlab(xlab)}
   if(method=="shape_color"){
     for(i in 1:length(plots)){
-      equation[[i]]=plots[[i]][[]]$plot$s
-      x=plots[[i]][[]]$plot$temp1
-      y=plots[[i]][[]]$plot$result
+      equation[[i]]=plots[[i]][[3]]$plot$s
+      x=plots[[i]][[3]]$plot$temp1
+      y=plots[[i]][[3]]$plot$result
       if(is.na(width.bar)==TRUE){width.bar=0.01*mean(x)}
       data=data.frame(x,y,color=as.factor(i))
-      pontosx=plots[[i]][[]]$plot$data1$trat
-      pontosy=plots[[i]][[]]$plot$data1$resp
-      desvio=plots[[i]][[]]$plot$desvio
+      pontosx=plots[[i]][[3]]$plot$data1$trat
+      pontosy=plots[[i]][[3]]$plot$data1$resp
+      desvio=plots[[i]][[3]]$plot$desvio
       pontos=data.frame(x=pontosx,
                         y=pontosy,
                         desvio=desvio,

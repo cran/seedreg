@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot_arrange.R
 \name{multicurve}
 \alias{multicurve}
-\title{Merge multiple curves into a single graph}
+\title{Graph: Merge multiple curves into a single graph}
 \usage{
 multicurve(
   plots,
@@ -54,7 +54,7 @@ multicurve(
 The function returns a graph joining the outputs of the functions LM_model, LL_model, BC_model, CD_model, loess_model, normal_model, piecewise_model and N_model
 }
 \description{
-Merge multiple curves into a single graph
+Graph: Merge multiple curves into a single graph
 }
 \details{
 The method argument defines the type of markup desired by the user. By default, method="shape_color" is used, which differentiates by color and dot shape. For gray scale, use method="shape_gray". To use only color, use method="color", in this case, the dot shape is 16 (filled circle). You can change the stitch pattern by setting the fill color in quotes followed by a space and the stitch number (eg "gray 21"). Still starting from this last method, if the user uses the change to point format without filling, such as 15, 16, 17 or 18, the function will ignore the first argument (ex. "gray 16"), however, of either way the user must define a color.
